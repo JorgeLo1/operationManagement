@@ -1,20 +1,28 @@
-# Dockerfile básico para Spring Boot
+# Dockerfile
 FROM openjdk:17-jdk-slim
 
-# Información del mantenedor
-LABEL maintainer="tu-email@ejemplo.com"
-
-# Crear directorio de trabajo
+# Establecer directorio de trabajo
 WORKDIR /app
 
-# Copiar el JAR generado (ajusta el nombre según tu proyecto)
-COPY target/*.jar app.jar
+# Copiar archivos de Maven
+COPY pom.xml .
+COPY .mvn .mvn
+COPY mvnw .
 
-# Exponer el puerto
+# Dar permisos de ejecución al wrapper de Maven
+RUN chmod +x ./mvnw
+
+# Descargar dependencias (esto mejora el cache de Docker)
+RUN ./mvnw dependency:go-offline -B
+
+# Copiar código fuente
+COPY src ./src
+
+# Construir la aplicación
+RUN ./mvnw clean package -DskipTests
+
+# Exponer puerto
 EXPOSE 8080
 
-# Variables de entorno opcionales
-ENV JAVA_OPTS=""
-
 # Comando para ejecutar la aplicación
-ENTRYPOINT ["sh", "-c", "java $JAVA_OPTS -jar app.jar"]
+CMD ["java", "-jar", "target/tu-app-0.0.1-SNAPSHOT.jar"]
