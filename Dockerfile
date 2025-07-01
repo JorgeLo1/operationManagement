@@ -1,11 +1,4 @@
-# Cambiar estas líneas:
-FROM openjdk:21-jdk-slim as build
-
-# Y en runtime:
-FROM openjdk:21-jre-slim
-
-# Dockerfile completo:
-FROM openjdk:21-jdk-slim as build
+FROM eclipse-temurin:21-jdk-alpine as build
 
 WORKDIR /app
 COPY pom.xml .
@@ -18,8 +11,7 @@ RUN ./mvnw dependency:go-offline -B
 COPY src ./src
 RUN ./mvnw clean package -DskipTests
 
-# Runtime stage
-FROM openjdk:21-jre-slim
+FROM eclipse-temurin:21-jre-alpine
 
 WORKDIR /app
 COPY --from=build /app/target/*.jar app.jar
